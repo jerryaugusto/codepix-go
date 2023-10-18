@@ -12,7 +12,7 @@ const (
 	TransactionPending   string = "pending"
 	TransactionCompleted string = "completed"
 	TransactionError     string = "error"
-	TransactinConfirmed  string = "confirmed"
+	TransactionConfirmed string = "confirmed"
 )
 
 type TransactionRepositoryInterface interface {
@@ -28,11 +28,13 @@ type Transactions struct {
 type Transaction struct {
 	Base              `valid:"required" json:"base,omitempty"`
 	AccountFrom       *Account `valid:"-"`
-	Amount            float64  `json:"amount,omitempty" valid:"notnull"`
+	AccountFromID     string   `gorm:"column:account_from_id;type:uuid;" valid:"notnull"`
+	Amount            float64  `json:"amount,omitempty" gorm:"type:float" valid:"notnull"`
 	PixKeyTo          *PixKey  `valid:"-"`
-	Status            string   `json:"status,omitempty" valid:"notnull"`
-	Description       string   `json:"description,omitempty" valid:"notnull"`
-	CancelDescription string   `json:"cancel_description,omitempty" valid:"-"`
+	PixKeyIdTo        string   `gorm:"column:pix_key_id_to;type:uuid;" valid:"notnull"`
+	Status            string   `json:"status,omitempty" gorm:"type:varchar(20)" valid:"notnull"`
+	Description       string   `json:"description,omitempty" gorm:"type:varchar(255)" valid:"-"`
+	CancelDescription string   `json:"cancel_description,omitempty" gorm:"type:varchar(255)" valid:"-"`
 }
 
 func (t *Transaction) isValid() error {
@@ -87,7 +89,7 @@ func (t *Transaction) Complete() error {
 }
 
 func (t *Transaction) Confirm() error {
-	t.Status = TransactinConfirmed
+	t.Status = TransactionConfirmed
 	t.UpdatedAt = time.Now()
 
 	err := t.isValid()
