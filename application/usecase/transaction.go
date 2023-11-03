@@ -51,3 +51,20 @@ func (t *TransactionUseCase) Confim(transactionId string) (*model.Transaction, e
 
 	return transaction, nil
 }
+
+func (t *TransactionUseCase) Error(transactionId string, reason string) (*model.Transaction, error) {
+	transaction, err := t.TransactionRepository.TransactionFind(transactionId)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction.Status = model.TransactionError
+	transaction.CancelDescription = reason
+
+	err = t.TransactionRepository.TransactionSave(transaction)
+	if err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
+}
